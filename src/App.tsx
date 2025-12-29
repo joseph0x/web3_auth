@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createContext, useContext } from "react";
 import { ethers } from "ethers";
-import { AlertCircle, Wallet, CheckCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Lock, Zap, Shield, X, Sparkles } from "lucide-react";
 
 // Types
 interface WalletState {
@@ -70,25 +70,14 @@ Issued At: ${issuedAt}`;
     return { address: accounts[0], chainId: Number(network.chainId) };
   };
 
-  // Connect to WalletConnect (mocked for demo - real implementation would use @walletconnect/ethereum-provider)
+  // Connect to WalletConnect (mocked for demo)
   const connectWalletConnect = async () => {
-    // In production, you would initialize WalletConnect like this:
-    // import { EthereumProvider } from '@walletconnect/ethereum-provider'
-    // const provider = await EthereumProvider.init({
-    //   projectId: 'YOUR_PROJECT_ID',
-    //   chains: [1],
-    //   showQrModal: true
-    // })
-    // await provider.connect()
-
-    // For this demo, we'll check if MetaMask is available as fallback
     if (!window.ethereum) {
       throw new Error(
         "WalletConnect requires a Web3 provider. Install MetaMask as fallback."
       );
     }
 
-    // Simulate WalletConnect flow with MetaMask as provider
     const provider = new ethers.BrowserProvider(window.ethereum);
     const accounts = await provider.send("eth_requestAccounts", []);
     const network = await provider.getNetwork();
@@ -139,7 +128,6 @@ Issued At: ${issuedAt}`;
 
       setState((prev) => ({ ...prev, isLoading: false }));
 
-      // In production, send { message, signature, address } to backend for verification
       return signature;
     } catch (err: any) {
       const errorMsg =
@@ -232,87 +220,290 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const handleConnect = async (type: "metamask" | "walletconnect") => {
     await connect(type);
-    onClose();
+    if (!isLoading) {
+      onClose();
+    }
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Connect Wallet</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-2xl"
-            disabled={isLoading}
-          >
-            ×
-          </button>
-        </div>
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+      <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl relative animate-fadeIn">
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          disabled={isLoading}
+          className="absolute top-6 right-6 text-gray-400 hover:text-gray-800 transition-colors disabled:opacity-50"
+        >
+          <X className="w-6 h-6" />
+        </button>
 
-        <div className="space-y-3">
+        {/* Header */}
+        <h2 className="text-4xl font-bold text-black mb-8">Connect Wallet</h2>
+
+        {/* Wallet Options */}
+        <div className="space-y-4 mb-6">
+          {/* MetaMask */}
           <button
             onClick={() => handleConnect("metamask")}
             disabled={isLoading}
-            className="w-full flex items-center justify-between p-4 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-between p-5 border-2 border-black rounded-full hover:bg-black hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
-                <Wallet className="w-6 h-6 text-white" />
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-black group-hover:bg-white rounded-full flex items-center justify-center transition-colors">
+                <svg
+                  className="w-7 h-7 text-white group-hover:text-black transition-colors"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M21.5 12c0 5.247-4.253 9.5-9.5 9.5S2.5 17.247 2.5 12 6.753 2.5 12 2.5s9.5 4.253 9.5 9.5z" />
+                </svg>
               </div>
-              <span className="font-semibold text-gray-900">MetaMask</span>
+              <div className="text-left">
+                <p className="font-bold text-lg">MetaMask</p>
+                <p className="text-sm text-gray-500 group-hover:text-gray-300">
+                  Popular browser wallet
+                </p>
+              </div>
             </div>
-            {isLoading && (
-              <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
-            )}
           </button>
 
+          {/* WalletConnect */}
           <button
             onClick={() => handleConnect("walletconnect")}
             disabled={isLoading}
-            className="w-full flex items-center justify-between p-4 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-between p-5 border-2 border-black rounded-full hover:bg-black hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-                <Wallet className="w-6 h-6 text-white" />
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-black group-hover:bg-white rounded-full flex items-center justify-center transition-colors">
+                <svg
+                  className="w-7 h-7 text-white group-hover:text-black transition-colors"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <rect x="3" y="3" width="7" height="7" rx="1" />
+                  <rect x="14" y="3" width="7" height="7" rx="1" />
+                  <rect x="3" y="14" width="7" height="7" rx="1" />
+                  <rect x="14" y="14" width="7" height="7" rx="1" />
+                </svg>
               </div>
-              <span className="font-semibold text-gray-900">WalletConnect</span>
+              <div className="text-left">
+                <p className="font-bold text-lg">WalletConnect</p>
+                <p className="text-sm text-gray-500 group-hover:text-gray-300">
+                  Scan with mobile wallet
+                </p>
+              </div>
             </div>
-            {isLoading && (
-              <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
-            )}
           </button>
         </div>
 
-        <p className="text-xs text-gray-500 mt-4 text-center">
-          By connecting, you agree to our Terms of Service
+        {/* Terms text */}
+        <p className="text-center text-sm text-gray-500">
+          By connecting, you agree to the Terms of Service.
         </p>
       </div>
     </div>
   );
 };
 
-// Main Authentication Component
-const AuthPage: React.FC = () => {
-  const {
-    address,
-    chainId,
-    isConnected,
-    isLoading,
-    error,
-    disconnect,
-    signMessage,
-  } = useWallet();
+// Landing Page Component
+const LandingPage: React.FC<{ onConnectClick: () => void }> = ({
+  onConnectClick,
+}) => {
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4 bg-white">
+      <div className="w-full max-w-2xl text-center space-y-8">
+        {/* Badge */}
+        <div className="flex justify-center">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-full text-sm font-medium">
+            <Sparkles className="w-4 h-4" />
+            Sign-In With Ethereum
+          </div>
+        </div>
+
+        {/* Main Heading */}
+        <div className="space-y-4">
+          <h1 className="text-5xl sm:text-6xl md:text-7xl font-bold text-black leading-tight">
+            Your Wallet,
+            <br />
+            Your Identity
+          </h1>
+          <p className="text-lg sm:text-xl text-gray-600 max-w-xl mx-auto">
+            No passwords. No emails. Just connect
+            <br className="hidden sm:block" /> your wallet and sign to
+            authenticate.
+          </p>
+        </div>
+
+        {/* Connect Card */}
+        <div className="max-w-md mx-auto">
+          <div className="border-2 border-black rounded-3xl p-8 space-y-6 bg-white">
+            <div className="space-y-2">
+              <h2 className="text-2xl font-bold text-black">Connect Wallet</h2>
+              <p className="text-gray-600">Choose a wallet to get started</p>
+            </div>
+
+            <button
+              onClick={onConnectClick}
+              className="w-full py-4 bg-black text-white font-semibold rounded-full hover:bg-gray-800 transition-all flex items-center justify-center gap-2"
+            >
+              <Lock className="w-5 h-5" />
+              Connect Wallet
+            </button>
+
+            {/* Features */}
+            <div className="flex items-center justify-around pt-4 border-t border-gray-200">
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                  <Lock className="w-5 h-5 text-black" />
+                </div>
+                <span className="text-xs font-medium text-gray-700">
+                  Secure
+                </span>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-black" />
+                </div>
+                <span className="text-xs font-medium text-gray-700">
+                  Instant
+                </span>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-black" />
+                </div>
+                <span className="text-xs font-medium text-gray-700">
+                  Private
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Dashboard Component (After Authentication)
+const Dashboard: React.FC = () => {
+  const { address, chainId, disconnect, isLoading } = useWallet();
+
+  return (
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <div className="w-full max-w-2xl">
+        <div className="border-2 border-black rounded-3xl p-8 space-y-6">
+          {/* Header */}
+          <div className="flex items-center justify-between pb-6 border-b border-gray-200">
+            <div>
+              <h2 className="text-3xl font-bold text-black mb-1">
+                Welcome Back
+              </h2>
+              <p className="text-gray-600">You're successfully authenticated</p>
+            </div>
+            <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+              <svg
+                className="w-6 h-6 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+            </div>
+          </div>
+
+          {/* Wallet Info */}
+          <div className="space-y-4">
+            <div className="bg-gray-50 rounded-2xl p-6 space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-gray-600">
+                  Wallet Address
+                </span>
+                <span className="font-mono font-bold text-black text-lg">
+                  {address ? shortenAddress(address) : ""}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-gray-600">
+                  Network
+                </span>
+                <span className="font-bold text-black">
+                  {chainId ? getNetworkName(chainId) : ""}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium text-gray-600">
+                  Status
+                </span>
+                <span className="inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
+                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                  Connected
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Actions */}
+          <button
+            onClick={disconnect}
+            disabled={isLoading}
+            className="w-full py-4 border-2 border-black text-black font-semibold rounded-full hover:bg-black hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Disconnect Wallet
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Main App Component
+const App: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [authStatus, setAuthStatus] = useState<
     "idle" | "signing" | "authenticated"
   >("idle");
 
-  const handleSignIn = async () => {
+  return (
+    <WalletProvider>
+      <AppContent
+        showModal={showModal}
+        setShowModal={setShowModal}
+        authStatus={authStatus}
+        setAuthStatus={setAuthStatus}
+      />
+    </WalletProvider>
+  );
+};
+
+// App Content (needs to be separate to use useWallet hook)
+const AppContent: React.FC<{
+  showModal: boolean;
+  setShowModal: (show: boolean) => void;
+  authStatus: "idle" | "signing" | "authenticated";
+  setAuthStatus: (status: "idle" | "signing" | "authenticated") => void;
+}> = ({ showModal, setShowModal, authStatus, setAuthStatus }) => {
+  const { isConnected, signMessage, error } = useWallet();
+
+  // Auto-trigger signing when wallet connects
+  useEffect(() => {
+    if (isConnected && authStatus === "idle") {
+      handleAutoSign();
+    }
+  }, [isConnected]);
+
+  const handleAutoSign = async () => {
     setAuthStatus("signing");
     const signature = await signMessage();
 
     if (signature) {
-      // Mock successful authentication
       setAuthStatus("authenticated");
       console.log("Authentication successful! Signature:", signature);
     } else {
@@ -320,121 +511,49 @@ const AuthPage: React.FC = () => {
     }
   };
 
-  const handleDisconnect = () => {
-    disconnect();
-    setAuthStatus("idle");
-  };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-3xl shadow-2xl p-8">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Wallet className="w-8 h-8 text-white" />
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Web3 Sign In
-            </h1>
-            <p className="text-gray-600">Connect your wallet to continue</p>
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-red-700">{error}</p>
-            </div>
-          )}
-
-          {/* Connected State */}
-          {isConnected && address && chainId ? (
-            <div className="space-y-4">
-              <div className="p-4 bg-gray-50 rounded-xl space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Address</span>
-                  <span className="font-mono font-semibold text-gray-900">
-                    {shortenAddress(address)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">Network</span>
-                  <span className="font-semibold text-gray-900">
-                    {getNetworkName(chainId)}
-                  </span>
-                </div>
-              </div>
-
-              {authStatus === "authenticated" ? (
-                <div className="p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  <div>
-                    <p className="font-semibold text-green-900">
-                      Authenticated
-                    </p>
-                    <p className="text-sm text-green-700">
-                      You're signed in successfully
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <button
-                  onClick={handleSignIn}
-                  disabled={isLoading}
-                  className="w-full py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      {authStatus === "signing"
-                        ? "Signing Message..."
-                        : "Connecting..."}
-                    </>
-                  ) : (
-                    "Sign Message to Authenticate"
-                  )}
-                </button>
-              )}
-
-              <button
-                onClick={handleDisconnect}
-                disabled={isLoading}
-                className="w-full py-3 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Disconnect
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => setShowModal(true)}
-              disabled={isLoading}
-              className="w-full py-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              <Wallet className="w-5 h-5" />
-              Connect Wallet
-            </button>
-          )}
-
-          {/* Info Text */}
-          <p className="text-xs text-center text-gray-500 mt-6">
-            No passwords or emails required. Your wallet is your identity.
-          </p>
-        </div>
+  // Show error notification
+  const ErrorNotification = error ? (
+    <div className="fixed top-4 right-4 left-4 sm:left-auto sm:w-96 bg-red-50 border-2 border-red-500 rounded-2xl p-4 flex items-start gap-3 shadow-lg z-50 animate-fadeIn">
+      <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+      <div className="flex-1">
+        <p className="font-semibold text-red-900 mb-1">Connection Error</p>
+        <p className="text-sm text-red-700">{error}</p>
       </div>
-
-      {/* Wallet Selection Modal */}
-      {showModal && <WalletModal onClose={() => setShowModal(false)} />}
     </div>
-  );
-};
+  ) : null;
 
-// Main App Component
-const App: React.FC = () => {
+  if (authStatus === "authenticated") {
+    return (
+      <>
+        <Dashboard />
+        {ErrorNotification}
+      </>
+    );
+  }
+
   return (
-    <WalletProvider>
-      <AuthPage />
-    </WalletProvider>
+    <>
+      <LandingPage onConnectClick={() => setShowModal(true)} />
+      {showModal && <WalletModal onClose={() => setShowModal(false)} />}
+      {ErrorNotification}
+
+      {/* Add CSS animation */}
+      <style>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out;
+        }
+      `}</style>
+    </>
   );
 };
 
