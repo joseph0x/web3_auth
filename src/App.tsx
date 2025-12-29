@@ -238,7 +238,7 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </button>
 
         {/* Header */}
-        <h2 className="text-4xl font-bold text-black mb-8">Connect Wallet</h2>
+        <h2 className="text-3xl font-bold text-black mb-8">Connect Wallet</h2>
 
         {/* Wallet Options */}
         <div className="space-y-4 mb-6">
@@ -246,17 +246,15 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           <button
             onClick={() => handleConnect("metamask")}
             disabled={isLoading}
-            className="w-full flex items-center justify-between p-5 border-2 border-black rounded-full hover:bg-black hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
+            className="w-full flex items-center justify-between p-2 border-2 border-black rounded-full hover:bg-black hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-black group-hover:bg-white rounded-full flex items-center justify-center transition-colors">
-                <svg
+                <img
+                  src="./metamask.png"
+                  alt="metamask"
                   className="w-7 h-7 text-white group-hover:text-black transition-colors"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path d="M21.5 12c0 5.247-4.253 9.5-9.5 9.5S2.5 17.247 2.5 12 6.753 2.5 12 2.5s9.5 4.253 9.5 9.5z" />
-                </svg>
+                />
               </div>
               <div className="text-left">
                 <p className="font-bold text-lg">MetaMask</p>
@@ -271,22 +269,15 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           <button
             onClick={() => handleConnect("walletconnect")}
             disabled={isLoading}
-            className="w-full flex items-center justify-between p-5 border-2 border-black rounded-full hover:bg-black hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
+            className="w-full flex items-center justify-between p-2 border-2 border-black rounded-full hover:bg-black hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed group"
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-black group-hover:bg-white rounded-full flex items-center justify-center transition-colors">
-                <svg
+                <img
+                  src="./WalletConnect.png"
+                  alt="walletconnect"
                   className="w-7 h-7 text-white group-hover:text-black transition-colors"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <rect x="3" y="3" width="7" height="7" rx="1" />
-                  <rect x="14" y="3" width="7" height="7" rx="1" />
-                  <rect x="3" y="14" width="7" height="7" rx="1" />
-                  <rect x="14" y="14" width="7" height="7" rx="1" />
-                </svg>
+                />
               </div>
               <div className="text-left">
                 <p className="font-bold text-lg">WalletConnect</p>
