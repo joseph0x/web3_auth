@@ -145,15 +145,40 @@ Issued At: ${issuedAt}`;
   };
 
   // Disconnect wallet
-  const disconnect = () => {
-    setProvider(null);
-    setState({
-      address: null,
-      chainId: null,
-      isConnected: false,
-      isLoading: false,
-      error: null,
-    });
+  const disconnect = async () => {
+    try {
+      // For MetaMask, we can't fully disconnect programmatically
+      // but we can request account permissions revocation
+      if (window.ethereum && window.ethereum.request) {
+        try {
+          // This clears the connection on supported wallets
+          await window.ethereum.request({
+            method: "wallet_revokePermissions",
+            params: [{ eth_accounts: {} }],
+          });
+        } catch (err) {
+          // If wallet_revokePermissions is not supported, just clear local state
+          console.log(
+            "Wallet disconnect method not supported, clearing local state"
+          );
+        }
+      }
+    } catch (err) {
+      console.error("Error disconnecting:", err);
+    } finally {
+      // Always clear local state
+      setProvider(null);
+      setState({
+        address: null,
+        chainId: null,
+        isConnected: false,
+        isLoading: false,
+        error: null,
+      });
+
+      // Reload the page to fully reset the connection
+      window.location.reload();
+    }
   };
 
   // Listen for account changes
@@ -238,7 +263,7 @@ const WalletModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </button>
 
         {/* Header */}
-        <h2 className="text-3xl font-bold text-black mb-8">Connect Wallet</h2>
+        <h2 className="text-4xl font-bold text-black mb-8">Connect Wallet</h2>
 
         {/* Wallet Options */}
         <div className="space-y-4 mb-6">
