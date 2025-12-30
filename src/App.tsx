@@ -70,20 +70,63 @@ Issued At: ${issuedAt}`;
     return { address: accounts[0], chainId: Number(network.chainId) };
   };
 
-  // Connect to WalletConnect (mocked for demo)
+  // Connect to WalletConnect with QR code
   const connectWalletConnect = async () => {
-    if (!window.ethereum) {
-      throw new Error(
-        "WalletConnect requires a Web3 provider. Install MetaMask as fallback."
+    try {
+      // Dynamically import WalletConnect provider
+      const { EthereumProvider } = await import(
+        "@walletconnect/ethereum-provider"
       );
+
+      // Initialize WalletConnect provider with your project ID
+      const walletConnectProvider = await EthereumProvider.init({
+        projectId: "13a141dd5399bce0d64ee324660430f3", // Replace with your Project ID
+        chains: [1], // Ethereum mainnet
+        optionalChains: [5, 11155111, 137, 80001], // Goerli, Sepolia, Polygon, Mumbai
+        showQrModal: true, // This shows the QR code modal
+        qrModalOptions: {
+          themeMode: "light",
+          themeVariables: {
+            "--wcm-z-index": "9999",
+          },
+        },
+      });
+
+      // Enable session (shows QR modal)
+      const accounts = await walletConnectProvider.enable();
+
+      // Create ethers provider from WalletConnect
+      const ethersProvider = new ethers.BrowserProvider(walletConnectProvider);
+      const network = await ethersProvider.getNetwork();
+
+      setProvider(ethersProvider);
+
+      // Listen for WalletConnect events
+      walletConnectProvider.on("accountsChanged", (accounts: string[]) => {
+        if (accounts.length === 0) {
+          disconnect();
+        } else {
+          setState((prev) => ({ ...prev, address: accounts[0] }));
+        }
+      });
+
+      walletConnectProvider.on("disconnect", () => {
+        disconnect();
+      });
+
+      return { address: accounts[0], chainId: Number(network.chainId) };
+    } catch (error: any) {
+      // If WalletConnect library is not installed, provide helpful error
+      if (
+        error.code === "MODULE_NOT_FOUND" ||
+        error.message.includes("Cannot find module")
+      ) {
+        throw new Error(
+          "WalletConnect not installed. Run: npm install @walletconnect/ethereum-provider"
+        );
+      }
+      throw error;
     }
-
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    const accounts = await provider.send("eth_requestAccounts", []);
-    const network = await provider.getNetwork();
-
-    setProvider(provider);
-    return { address: accounts[0], chainId: Number(network.chainId) };
   };
 
   // Main connect function
@@ -472,7 +515,7 @@ const Dashboard: React.FC = () => {
             disabled={isLoading}
             className="w-full py-4 border-2 border-black text-black font-semibold rounded-full hover:bg-black hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Disconnect Wallet
+            {isLoading ? "Disconnecting..." : "Disconnect Wallet"}
           </button>
         </div>
       </div>
